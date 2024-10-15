@@ -21,3 +21,6 @@ Refer to api/main.py and tests/tests_main.py, the test to update the quantities 
 E assert 422 == 200 E + where 422 = <Response [422 Unprocessable Entity]>.status_code
 
 tests/test_main.py:44: AssertionError
+
+# Refactor for coding standards and performance
+Everything works perfectly. Now, let's create a new folder and two files, the folder will be called repositories, and the files will be called product.py and cart.py, in each file, I want to process each of the processes that are used for each endpoint, this should be done with OOP, to mantain single responsibility.

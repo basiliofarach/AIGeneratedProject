@@ -2,73 +2,53 @@
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
-import requests
 import stripe
 import os
 from dotenv import load_dotenv
 from models.models import Product, CartItem, PaymentRequest, UpdateCartItem
+from repositories.product import ProductRepository
+from repositories.cart import CartRepository
 
 app = FastAPI()
 
-# Stripe configuration
 # Load environment variables from .env file
 load_dotenv()
 
 # Stripe configuration
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-# In-memory database for simplicity
-products_db = []
-cart_db = {}
+# Initialize repositories
+product_repo = ProductRepository()
+cart_repo = CartRepository()
 
 # Fetch products from fakestoreapi.com
 @app.on_event("startup")
 def fetch_products():
-    global products_db
-    response = requests.get("https://fakestoreapi.com/products")
-    if response.status_code == 200:
-        products_db = response.json()
+    product_repo.fetch_products()
 
 # Endpoints
 @app.get("/products")
 def get_products(sort: str = Query(None, regex="^(price_asc|price_desc)$")):
-    if sort == "price_asc":
-        sorted_products = sorted(products_db, key=lambda x: x["price"])
-    elif sort == "price_desc":
-        sorted_products = sorted(products_db, key=lambda x: x["price"], reverse=True)
-    else:
-        sorted_products = products_db
-    return sorted_products
+    return product_repo.get_products(sort)
 
 @app.post("/cart")
 def add_to_cart(item: CartItem):
-    if item.product_id not in cart_db:
-        cart_db[item.product_id] = item.quantity
-    else:
-        cart_db[item.product_id] += item.quantity
-    return {"message": "Item added to cart"}
+    return cart_repo.add_to_cart(item.product_id, item.quantity)
 
 @app.get("/cart")
 def get_cart():
-    cart_items = []
-    for product_id, quantity in cart_db.items():
-        product = next((p for p in products_db if p["id"] == product_id), None)
-        if product:
-            cart_items.append({"product": product, "quantity": quantity})
-    return cart_items
+    return cart_repo.get_cart(product_repo.products_db)
 
 @app.put("/cart/{product_id}")
 def update_cart(product_id: int, item: UpdateCartItem):
-    if product_id in cart_db:
-        cart_db[product_id] = item.quantity
-        return {"message": "Cart updated"}
-    else:
-        raise HTTPException(status_code=404, detail="Product not found in cart")
+    result = cart_repo.update_cart(product_id, item)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return result
 
 @app.get("/cart/total")
 def get_cart_total():
-    total = sum(next((p["price"] for p in products_db if p["id"] == product_id), 0) * quantity for product_id, quantity in cart_db.items())
-    return {"total": total}
+    return cart_repo.get_cart_total(product_repo.products_db)
 
 @app.post("/payment")
 def process_payment(payment_request: PaymentRequest):
