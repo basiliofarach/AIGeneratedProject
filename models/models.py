@@ -18,3 +18,6 @@ class PaymentRequest(BaseModel):
     amount: int
     currency: str
     source: str
+
+class UpdateCartItem(BaseModel):
+    quantity: int

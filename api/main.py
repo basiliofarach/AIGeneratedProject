@@ -4,9 +4,9 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 import requests
 import stripe
-from dotenv import load_dotenv
 import os
-from models.models import Product, CartItem, PaymentRequest  # Updated import
+from dotenv import load_dotenv
+from models.models import Product, CartItem, PaymentRequest, UpdateCartItem
 
 app = FastAPI()
 
@@ -58,9 +58,9 @@ def get_cart():
     return cart_items
 
 @app.put("/cart/{product_id}")
-def update_cart(quantity: int):
+def update_cart(product_id: int, item: UpdateCartItem):
     if product_id in cart_db:
-        cart_db[product_id] = quantity
+        cart_db[product_id] = item.quantity
         return {"message": "Cart updated"}
     else:
         raise HTTPException(status_code=404, detail="Product not found in cart")

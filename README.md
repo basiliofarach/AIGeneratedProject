@@ -12,3 +12,12 @@ Add environ on this file, and make a call to the .env file, add this line to be 
 
 # Models
 In the selected text: This three classes should be sent to a new folder, called models, send them there, and add the imports on this file main.py
+
+Perfect. Now, take api/main.py, and check the tests on tests/test_main.py . Help me change the tests to read the models and to follow previous behaviour.
+
+# Bugs
+Refer to api/main.py and tests/tests_main.py, the test to update the quantities on the cart is not working, I am getting the following error: def test_change_item_quantity(self): product_id = 1 new_quantity = 3 response = client.put(f"/cart/{product_id}", json={"quantity": new_quantity})
+
+E assert 422 == 200 E + where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests/test_main.py:44: AssertionError
