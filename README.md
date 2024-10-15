@@ -6,3 +6,9 @@ Having this, please, create test for each section using pytests. I will be using
 
 # Endpoints (API)
 Perfect. This looks good. Now, please, having those tests, create the needed endpoints and connections to fakestoreapi.com and to stripe to follow the specifications for completion for each test.
+
+- Inline prompts:
+Add environ on this file, and make a call to the .env file, add this line to be STRIPE_SECRET_KEY
+
+# Models
+In the selected text: This three classes should be sent to a new folder, called models, send them there, and add the imports on this file main.py

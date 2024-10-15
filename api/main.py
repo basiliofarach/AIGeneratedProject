@@ -4,33 +4,22 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 import requests
 import stripe
+from dotenv import load_dotenv
+import os
+from models.models import Product, CartItem, PaymentRequest  # Updated import
 
 app = FastAPI()
 
 # Stripe configuration
-stripe.api_key = "your_stripe_secret_key"
+# Load environment variables from .env file
+load_dotenv()
+
+# Stripe configuration
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 # In-memory database for simplicity
 products_db = []
 cart_db = {}
-
-# Models
-class Product(BaseModel):
-    id: int
-    title: str
-    price: float
-    description: str
-    category: str
-    image: str
-
-class CartItem(BaseModel):
-    product_id: int
-    quantity: int
-
-class PaymentRequest(BaseModel):
-    amount: int
-    currency: str
-    source: str
 
 # Fetch products from fakestoreapi.com
 @app.on_event("startup")
