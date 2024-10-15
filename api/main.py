@@ -31,10 +31,10 @@ def fetch_products():
 
 # Endpoints
 @app.get("/products")
-def get_products(sort: str = Query(None, regex="^(price_low_to_high|price_high_to_low)$")):
-    if sort == "price_low_to_high":
+def get_products(sort: str = Query(None, regex="^(price_asc|price_desc)$")):
+    if sort == "price_asc":
         sorted_products = sorted(products_db, key=lambda x: x["price"])
-    elif sort == "price_high_to_low":
+    elif sort == "price_desc":
         sorted_products = sorted(products_db, key=lambda x: x["price"], reverse=True)
     else:
         sorted_products = products_db
@@ -58,7 +58,7 @@ def get_cart():
     return cart_items
 
 @app.put("/cart/{product_id}")
-def update_cart(product_id: int, quantity: int):
+def update_cart(quantity: int):
     if product_id in cart_db:
         cart_db[product_id] = quantity
         return {"message": "Cart updated"}

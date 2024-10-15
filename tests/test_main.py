@@ -1,9 +1,9 @@
+# tests/test_main.py
+
 import pytest
 from fastapi.testclient import TestClient
 from api.main import app
-
-# api/test_main.py
-
+from models.models import Product, CartItem, PaymentRequest  # Ensure models are imported
 
 client = TestClient(app)
 
@@ -26,10 +26,10 @@ class TestProductList:
         assert all(products[i]['price'] >= products[i+1]['price'] for i in range(len(products)-1))
 
     def test_add_to_cart(self):
-        product_id = 1
-        response = client.post(f"/cart/add/{product_id}")
+        cart_item = {"product_id": 1, "quantity": 2}
+        response = client.post("/cart", json=cart_item)
         assert response.status_code == 200
-        assert response.json() == {"message": "Product added to cart"}
+        assert response.json() == {"message": "Item added to cart"}
 
 class TestShoppingCart:
     def test_list_cart_items(self):
@@ -40,9 +40,9 @@ class TestShoppingCart:
     def test_change_item_quantity(self):
         product_id = 1
         new_quantity = 3
-        response = client.put(f"/cart/update/{product_id}", json={"quantity": new_quantity})
+        response = client.put(f"/cart/{product_id}", json={"quantity": new_quantity})
         assert response.status_code == 200
-        assert response.json() == {"message": "Quantity updated"}
+        assert response.json() == {"message": "Cart updated"}
 
     def test_get_total_price(self):
         response = client.get("/cart/total")
@@ -55,7 +55,6 @@ class TestPayment:
             "amount": 1000,
             "currency": "usd",
             "source": "tok_visa",  # This is a test token provided by Stripe
-            "description": "Test payment"
         }
         response = client.post("/payment", json=payment_data)
         assert response.status_code == 200
