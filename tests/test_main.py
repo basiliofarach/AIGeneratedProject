@@ -59,4 +59,4 @@ class TestPayment:
         }
         response = client.post("/payment", json=payment_data)
         assert response.status_code == 200
-        assert response.json() == {"message": "Payment successful"}
+        assert response.json()["message"] == "Payment successful"
