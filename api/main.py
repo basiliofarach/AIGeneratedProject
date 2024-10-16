@@ -53,12 +53,16 @@ def get_cart_total():
 @app.post("/payment")
 def process_payment(payment_request: PaymentRequest):
     try:
+        # Calculate the total amount from the cart
+        cart_total = cart_repo.get_cart_total(product_repo.products_db)
+        # Create a charge using Stripe
         charge = stripe.Charge.create(
-            amount=payment_request.amount,
+            amount=int(cart_total["total"] * 100) | payment_request.amount,  # Stripe expects the amount in cents
             currency=payment_request.currency,
             source=payment_request.source,
             description="E-commerce payment"
         )
+        
         return {"message": "Payment successful", "charge": charge}
     except stripe.error.StripeError as e:
         raise HTTPException(status_code=400, detail=str(e))
